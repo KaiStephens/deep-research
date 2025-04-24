@@ -5,7 +5,8 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/utils/style"
 
-const TooltipProvider = TooltipPrimitive.Provider
+// Use memo to avoid unnecessary re-renders
+const TooltipProvider = React.memo(TooltipPrimitive.Provider)
 
 const Tooltip = TooltipPrimitive.Root
 

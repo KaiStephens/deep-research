@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
@@ -18,32 +18,30 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
   
-  // This useEffect only runs when mounted changes to true and when resolvedTheme changes
+  // Update store only when theme changes and component is mounted
   useEffect(() => {
     if (mounted && resolvedTheme) {
       try {
-        settingStore.update({ theme: resolvedTheme });
+        // Only update if the theme in the store doesn't match the resolved theme
+        if (settingStore.theme !== resolvedTheme) {
+          settingStore.update({ theme: resolvedTheme });
+        }
       } catch (error) {
         console.error("Error updating theme in store:", error);
       }
     }
   }, [resolvedTheme, settingStore, mounted]);
 
-  const toggleTheme = () => {
+  // Memoize the toggle function to prevent recreation on each render
+  const toggleTheme = useCallback(() => {
     try {
       const currentTheme = resolvedTheme || 'light';
       const newTheme = currentTheme === "dark" ? "light" : "dark";
       setTheme(newTheme);
-      
-      try {
-        settingStore.update({ theme: newTheme });
-      } catch (e) {
-        console.error("Failed to update theme in store", e);
-      }
     } catch (error) {
       console.error("Error toggling theme:", error);
     }
-  };
+  }, [resolvedTheme, setTheme]);
 
   // Don't access theme for rendering until after client-side hydration is complete
   if (!mounted) {
