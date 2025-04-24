@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// Check if we're running in Cloudflare Pages
+const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+
 export interface SettingStore {
   provider: string;
   mode: string;
@@ -64,7 +67,7 @@ interface SettingFunction {
 
 export const defaultValues: SettingStore = {
   provider: "openrouter",
-  mode: "local",
+  mode: isCloudflare ? "proxy" : "local",
   apiKey: process.env.OPENROUTER_API_KEY || "",
   apiProxy: "",
   thinkingModel: "microsoft/Mai-Ds-R1:free",

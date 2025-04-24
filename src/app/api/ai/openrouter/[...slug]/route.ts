@@ -15,6 +15,12 @@ export const preferredRegion = [
 
 const API_PROXY_BASE_URL =
   process.env.OPENROUTER_API_BASE_URL || OPENROUTER_BASE_URL;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+// Log warning if OpenRouter API key is missing
+if (!OPENROUTER_API_KEY) {
+  console.error("WARNING: OPENROUTER_API_KEY environment variable is not set. Requests will fail!");
+}
 
 async function handler(req: NextRequest) {
   let body;

@@ -21,6 +21,9 @@ import { useSettingStore } from "@/store/setting";
 import { useTaskStore } from "@/store/task";
 import { useHistoryStore } from "@/store/history";
 
+// Check if we're running in Cloudflare Pages
+const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+
 const formSchema = z.object({
   topic: z.string().min(2),
 });
@@ -50,7 +53,8 @@ function Topic() {
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     const { mode } = useSettingStore.getState();
-    if ((mode === "local" && hasApiKey()) || mode === "proxy") {
+    // Always proceed if on Cloudflare Pages or if API key requirements are met
+    if (isCloudflare || (mode === "local" && hasApiKey()) || mode === "proxy") {
       const { id, setQuestion } = useTaskStore.getState();
       try {
         setIsThinking(true);
