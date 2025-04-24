@@ -9,7 +9,7 @@ import { useSettingStore } from "@/store/setting";
 
 export function ThemeToggle() {
   const { t } = useTranslation();
-  const { theme, resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const settingStore = useSettingStore();
   
@@ -18,28 +18,35 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
 
-  // Make sure theme changes are saved to the store
+  // Save theme changes to store after component is mounted
   useEffect(() => {
-    if (mounted && theme) {
-      settingStore.update({ theme: theme });
+    if (mounted && resolvedTheme) {
+      try {
+        settingStore.update({ theme: resolvedTheme });
+      } catch (error) {
+        console.error("Error updating theme in store:", error);
+      }
     }
-  }, [mounted, theme, settingStore]);
+  }, [mounted, resolvedTheme, settingStore]);
 
   const toggleTheme = () => {
-    // Use resolvedTheme to get the actual current theme (accounting for system preference)
-    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    settingStore.update({ theme: newTheme });
-    
-    // Force document class update for immediate visual feedback
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    try {
+      const currentTheme = resolvedTheme || 'light';
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      setTheme(newTheme);
+      
+      // Try to update store
+      try {
+        settingStore.update({ theme: newTheme });
+      } catch (e) {
+        console.error("Failed to update theme in store", e);
+      }
+    } catch (error) {
+      console.error("Error toggling theme:", error);
     }
   };
 
-  // Don't render anything until mounted to prevent hydration mismatch
+  // Use a placeholder during SSR to avoid hydration mismatch
   if (!mounted) {
     return (
       <Button
@@ -53,7 +60,6 @@ export function ThemeToggle() {
     );
   }
 
-  // Use resolvedTheme rather than theme to account for system preference
   const isDark = resolvedTheme === "dark";
 
   return (

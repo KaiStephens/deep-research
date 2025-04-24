@@ -14,7 +14,7 @@ function Header() {
       <header className="flex justify-between items-center my-6 max-sm:my-4 print:hidden">
         <h1 className="text-left text-xl font-semibold">
           {t("title")}
-          <small className="ml-2 font-normal text-base">By: Kai Stephens</small>
+          <small className="ml-2 font-normal text-base">made by: Kai Stephens</small>
         </h1>
         <div className="flex gap-1">
           <Button

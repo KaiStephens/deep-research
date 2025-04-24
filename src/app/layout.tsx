@@ -46,7 +46,6 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           storageKey="deepPod-theme"
-          forcedTheme={undefined}
         >
           <I18Provider>{children}</I18Provider>
         </ThemeProvider>

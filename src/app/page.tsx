@@ -1,39 +1,49 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 
-const Header = dynamic(() => import("@/components/Header"));
-const Topic = dynamic(() => import("@/components/Research/Topic"));
-const Feedback = dynamic(() => import("@/components/Research/Feedback"));
+const Header = dynamic(() => import("@/components/Header"), { ssr: true });
+const Topic = dynamic(() => import("@/components/Research/Topic"), { ssr: false });
+const Feedback = dynamic(() => import("@/components/Research/Feedback"), { ssr: false });
 const SearchResult = dynamic(
-  () => import("@/components/Research/SearchResult")
+  () => import("@/components/Research/SearchResult"),
+  { ssr: false }
 );
-const FinalReport = dynamic(() => import("@/components/Research/FinalReport"));
-const PodcastScript = dynamic(() => import("@/components/Research/PodcastScript"));
-const History = dynamic(() => import("@/components/History"));
+const FinalReport = dynamic(() => import("@/components/Research/FinalReport"), { ssr: false });
+const PodcastScript = dynamic(() => import("@/components/Research/PodcastScript"), { ssr: false });
+const History = dynamic(() => import("@/components/History"), { ssr: false });
 
 function Home() {
+  const [mounted, setMounted] = useState(false);
   const globalStore = useGlobalStore();
   const settingStore = useSettingStore();
   const { setTheme } = useTheme();
 
-  // Use effect instead of layoutEffect for better SSR compatibility
+  // Use effect for initialization
   useEffect(() => {
-    const storedTheme = settingStore.theme;
-    if (storedTheme && storedTheme !== 'system') {
-      setTheme(storedTheme);
-      
-      // Force document class update for immediate visual feedback
-      if (storedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+    setMounted(true);
+    
+    try {
+      // Apply stored theme if available
+      const storedTheme = settingStore.theme;
+      if (storedTheme && storedTheme !== 'system') {
+        setTheme(storedTheme);
       }
+    } catch (error) {
+      console.error("Error initializing theme:", error);
     }
-  }, [settingStore.theme, setTheme]);
+  }, [setTheme, settingStore.theme]);
+
+  // Don't render main content until after first mount to avoid hydration issues
+  if (!mounted) {
+    return <div className="max-w-screen-md mx-auto px-4 pb-16">
+      <Header />
+      <div className="min-h-screen"></div>
+    </div>;
+  }
 
   return (
     <div className="max-w-screen-md mx-auto px-4 pb-16">
