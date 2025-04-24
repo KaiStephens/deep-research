@@ -67,8 +67,7 @@ function Topic() {
         accurateTimerStop();
       }
     } else {
-      const { setOpenSetting } = useGlobalStore.getState();
-      setOpenSetting(true);
+      alert(t("API key is required for research."));
     }
   }
 
