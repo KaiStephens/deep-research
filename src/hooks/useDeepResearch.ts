@@ -26,8 +26,19 @@ import { isNetworkingModel } from "@/utils/model";
 import { parseError } from "@/utils/error";
 import { pick, flat } from "radash";
 
-// Check if we're running in Cloudflare Pages
-const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+// Check if we're running in Cloudflare Pages with multiple detection methods
+const isCloudflare = typeof window !== 'undefined' && (
+  window.location.hostname.includes('pages.dev') || 
+  // Additional tests that might help detect Cloudflare environment
+  document.cookie.includes('__cf') || 
+  navigator.userAgent.includes('Cloudflare')
+);
+
+// Force always log this on initialization
+if (typeof window !== 'undefined') {
+  console.log("[CRITICAL] useDeepResearch - isCloudflare detection:", isCloudflare);
+  console.log("[CRITICAL] useDeepResearch - hostname:", window.location.hostname);
+}
 
 function getResponseLanguagePrompt(lang: string) {
   return `**Respond in ${lang}**`;
@@ -69,14 +80,17 @@ function useDeepResearch() {
   
   // Force to proxy mode if on Cloudflare Pages
   useEffect(() => {
-    if (isCloudflare) {
+    if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+      console.log("[CRITICAL] useDeepResearch - Forcing proxy mode and OpenRouter provider");
       const { mode, provider, update } = useSettingStore.getState();
       if (mode !== 'proxy') {
         update({ mode: 'proxy' });
+        console.log("[CRITICAL] useDeepResearch - Updated mode to proxy");
       }
       // Set OpenRouter as the default provider on Cloudflare
       if (provider !== 'openrouter') {
         update({ provider: 'openrouter' });
+        console.log("[CRITICAL] useDeepResearch - Updated provider to openrouter");
       }
     }
   }, []);

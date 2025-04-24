@@ -1,8 +1,19 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Check if we're running in Cloudflare Pages
-const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+// Check if we're running in Cloudflare Pages with multiple detection methods
+const isCloudflare = typeof window !== 'undefined' && (
+  window.location.hostname.includes('pages.dev') || 
+  // Additional tests that might help detect Cloudflare environment
+  document.cookie.includes('__cf') || 
+  navigator.userAgent.includes('Cloudflare')
+);
+
+// Force always log this on initialization
+if (typeof window !== 'undefined') {
+  console.log("[CRITICAL] store/setting - isCloudflare detection:", isCloudflare);
+  console.log("[CRITICAL] store/setting - hostname:", window.location.hostname);
+}
 
 export interface SettingStore {
   provider: string;
@@ -66,7 +77,7 @@ interface SettingFunction {
 }
 
 export const defaultValues: SettingStore = {
-  provider: "openrouter",
+  provider: isCloudflare ? "openrouter" : "openrouter",
   mode: isCloudflare ? "proxy" : "local",
   apiKey: process.env.OPENROUTER_API_KEY || "",
   apiProxy: "",
@@ -121,12 +132,45 @@ export const defaultValues: SettingStore = {
   debug: "disable",
 };
 
+// Ensure Cloudflare settings are enforced
+if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+  console.log("[CRITICAL] Setting default values for Cloudflare");
+  defaultValues.mode = "proxy";
+  defaultValues.provider = "openrouter";
+}
+
 export const useSettingStore = create(
   persist<SettingStore & SettingFunction>(
     (set) => ({
       ...defaultValues,
-      update: (values) => set(values),
-      reset: () => set(defaultValues),
+      update: (values) => {
+        // Force proxy mode and openrouter provider if on Cloudflare
+        const valuesToSet = { ...values };
+        if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+          if (valuesToSet.mode && valuesToSet.mode !== 'proxy') {
+            console.log("[CRITICAL] Forcing proxy mode for Cloudflare");
+            valuesToSet.mode = 'proxy';
+          }
+          if (valuesToSet.provider && valuesToSet.provider !== 'openrouter') {
+            console.log("[CRITICAL] Forcing openrouter provider for Cloudflare");
+            valuesToSet.provider = 'openrouter';
+          }
+        }
+        set(valuesToSet);
+      },
+      reset: () => {
+        // When resetting, ensure Cloudflare-specific settings are preserved
+        if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+          console.log("[CRITICAL] Reset called - enforcing Cloudflare settings");
+          set({
+            ...defaultValues,
+            mode: 'proxy',
+            provider: 'openrouter'
+          });
+        } else {
+          set(defaultValues);
+        }
+      },
     }),
     { name: "setting" }
   )

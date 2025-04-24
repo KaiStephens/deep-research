@@ -21,8 +21,20 @@ import { useSettingStore } from "@/store/setting";
 import { useTaskStore } from "@/store/task";
 import { useHistoryStore } from "@/store/history";
 
-// Check if we're running in Cloudflare Pages
-const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+// Check if we're running in Cloudflare Pages with multiple detection methods
+const isCloudflarePages = 
+  (typeof window !== 'undefined' && (
+    window.location.hostname.includes('pages.dev') || 
+    // Additional tests that might help detect Cloudflare environment
+    document.cookie.includes('__cf') || 
+    navigator.userAgent.includes('Cloudflare')
+  ));
+
+// Force always log this important detection for debugging
+if (typeof window !== 'undefined') {
+  console.log("[CRITICAL] isCloudflarePages detection result:", isCloudflarePages);
+  console.log("[CRITICAL] Current hostname:", window.location.hostname);
+}
 
 const formSchema = z.object({
   topic: z.string().min(2),
@@ -52,18 +64,20 @@ function Topic() {
   }, [taskStore.question, form]);
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
-    const { mode } = useSettingStore.getState();
+    const { mode, provider } = useSettingStore.getState();
     const apiKeyPresent = hasApiKey(); // Store the result
 
     // Log the values for debugging
     console.log("[DEBUG] handleSubmit triggered");
-    console.log("[DEBUG] isCloudflare:", isCloudflare);
+    console.log("[DEBUG] isCloudflarePages:", isCloudflarePages);
+    console.log("[DEBUG] hostname:", window.location.hostname);
     console.log("[DEBUG] mode:", mode);
+    console.log("[DEBUG] provider:", provider);
     console.log("[DEBUG] hasApiKey():", apiKeyPresent);
-    console.log("[DEBUG] Condition check:", isCloudflare || (mode === "local" && apiKeyPresent) || mode === "proxy");
+    console.log("[DEBUG] Condition check:", isCloudflarePages || (mode === "local" && apiKeyPresent) || mode === "proxy");
 
-    // Always proceed if on Cloudflare Pages or if API key requirements are met
-    if (isCloudflare || (mode === "local" && apiKeyPresent) || mode === "proxy") {
+    // ALWAYS proceed if on Cloudflare Pages or if API key requirements are met
+    if (isCloudflarePages || window.location.hostname.includes('pages.dev') || (mode === "local" && apiKeyPresent) || mode === "proxy") {
       const { id, setQuestion } = useTaskStore.getState();
       try {
         setIsThinking(true);
@@ -79,6 +93,15 @@ function Topic() {
         accurateTimerStop();
       }
     } else {
+      // Extended logging before showing alert
+      console.error("[ERROR] API key check failed with these values:", {
+        hostname: window.location.hostname,
+        isCloudflarePages,
+        mode,
+        provider,
+        apiKeyPresent,
+        userAgent: navigator.userAgent,
+      });
       // Modified alert text for confirmation
       alert(t("API key is required for research. (From Topic.tsx)"));
     }

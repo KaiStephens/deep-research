@@ -20,8 +20,19 @@ import { multiApiKeyPolling } from "@/utils/model";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 
-// Check if we're running in Cloudflare Pages
-const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+// Check if we're running in Cloudflare Pages with multiple detection methods
+const isCloudflare = typeof window !== 'undefined' && (
+  window.location.hostname.includes('pages.dev') || 
+  // Additional tests that might help detect Cloudflare environment
+  document.cookie.includes('__cf') || 
+  navigator.userAgent.includes('Cloudflare')
+);
+
+// Force always log this on initialization
+if (typeof window !== 'undefined') {
+  console.log("[CRITICAL] useAiProvider - isCloudflare detection:", isCloudflare);
+  console.log("[CRITICAL] useAiProvider - hostname:", window.location.hostname);
+}
 
 function useModelProvider() {
   function createProvider(model: string, settings?: any) {
@@ -289,10 +300,18 @@ function useModelProvider() {
   }
 
   function hasApiKey(): boolean {
-    const { provider, mode: configuredMode } = useSettingStore.getState();
+    const { provider } = useSettingStore.getState();
+    
+    // Log critical debug info
+    if (typeof window !== 'undefined') {
+      console.log("[CRITICAL] hasApiKey check - isCloudflare:", isCloudflare);
+      console.log("[CRITICAL] hasApiKey check - hostname:", window.location.hostname);
+      console.log("[CRITICAL] hasApiKey check - provider:", provider);
+    }
     
     // Always return true for API key check when on Cloudflare Pages
-    if (isCloudflare) {
+    if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+      console.log("[CRITICAL] hasApiKey returning true because Cloudflare detected");
       return true;
     }
     
