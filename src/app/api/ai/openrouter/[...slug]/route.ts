@@ -111,13 +111,13 @@ async function handler(req: NextRequest) {
     console.log("[CRITICAL] OpenRouter response status:", response.status);
     
     if (!response.ok) {
-      let errorText = await response.text();
+      const errorText = await response.text();
       try {
-        // Try to parse error as JSON for better error reporting
+        // Try to parse error as JSON for better reporting
         const errorJson = JSON.parse(errorText);
         console.error("[CRITICAL] OpenRouter API error (JSON):", response.status, JSON.stringify(errorJson));
         return NextResponse.json(errorJson, { status: response.status });
-      } catch (e) {
+      } catch (_) {
         // Fallback to raw error text
         console.error("[CRITICAL] OpenRouter API error (text):", response.status, errorText);
         return NextResponse.json(

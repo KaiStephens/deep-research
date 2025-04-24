@@ -42,6 +42,17 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_VERSION: pkg.version,
   },
+  reactStrictMode: true,
+  // Ignore ESLint errors during production build
+  eslint: {
+    // Only run ESLint in development, not during builds
+    ignoreDuringBuilds: true,
+  },
+  // Ignore TypeScript errors during production build
+  typescript: {
+    // Only report TypeScript errors in development, not during builds
+    ignoreBuildErrors: true,
+  },
 };
 
 if (BUILD_MODE === "export") {

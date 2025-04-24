@@ -1,13 +1,3 @@
-import { type APICallError } from "ai";
-
-interface GeminiError {
-  error: {
-    code: number;
-    message: string;
-    status: string;
-  };
-}
-
 // Helper functions for typeguarding
 function isString(value: unknown): value is string {
   return typeof value === "string";
@@ -39,7 +29,7 @@ export function parseError(error: any): string {
             return `API Error: ${jsonError.error.message}`;
           }
         }
-      } catch (e) {
+      } catch (_) {
         // Ignore JSON parsing errors
       }
       
