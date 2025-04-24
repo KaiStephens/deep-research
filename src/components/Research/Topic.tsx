@@ -53,8 +53,17 @@ function Topic() {
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
     const { mode } = useSettingStore.getState();
+    const apiKeyPresent = hasApiKey(); // Store the result
+
+    // Log the values for debugging
+    console.log("[DEBUG] handleSubmit triggered");
+    console.log("[DEBUG] isCloudflare:", isCloudflare);
+    console.log("[DEBUG] mode:", mode);
+    console.log("[DEBUG] hasApiKey():", apiKeyPresent);
+    console.log("[DEBUG] Condition check:", isCloudflare || (mode === "local" && apiKeyPresent) || mode === "proxy");
+
     // Always proceed if on Cloudflare Pages or if API key requirements are met
-    if (isCloudflare || (mode === "local" && hasApiKey()) || mode === "proxy") {
+    if (isCloudflare || (mode === "local" && apiKeyPresent) || mode === "proxy") {
       const { id, setQuestion } = useTaskStore.getState();
       try {
         setIsThinking(true);
@@ -70,7 +79,8 @@ function Topic() {
         accurateTimerStop();
       }
     } else {
-      alert(t("API key is required for research."));
+      // Modified alert text for confirmation
+      alert(t("API key is required for research. (From Topic.tsx)"));
     }
   }
 
