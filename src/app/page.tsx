@@ -26,7 +26,7 @@ function Home() {
     setTheme(settingStore.theme);
   }, [theme, setTheme]);
   return (
-    <div className="max-w-screen-md mx-auto px-4">
+    <div className="max-w-screen-md mx-auto px-4 pb-16">
       <Header />
       <main>
         <Topic />
