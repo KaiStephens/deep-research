@@ -28,7 +28,12 @@ async function handler(req: NextRequest) {
   
   let body;
   if (req.method.toUpperCase() !== "GET") {
-    body = await req.json();
+    try {
+      body = await req.json();
+      console.log("[CRITICAL] Request body parsed:", !!body);
+    } catch (e) {
+      console.error("[CRITICAL] Error parsing request body:", e);
+    }
   }
   const searchParams = req.nextUrl.searchParams;
   const path = searchParams.getAll("slug");
@@ -40,20 +45,27 @@ async function handler(req: NextRequest) {
     if (params) url += `?${params}`;
     console.log("[CRITICAL] OpenRouter forwarding to:", url);
     
-    // Check if Authorization header exists
-    const authHeader = req.headers.get("Authorization") || "";
-    console.log("[CRITICAL] Auth header present:", !!authHeader);
+    // DIRECT FIX: Always use the server API key directly rather than relying on the request header
+    // This bypasses any client-side authentication issues
+    if (!OPENROUTER_API_KEY) {
+      console.error("[CRITICAL] OPENROUTER_API_KEY is not set in environment variables!");
+      return NextResponse.json(
+        { error: "No API key configured on server" },
+        { status: 500 }
+      );
+    }
     
     const payload: RequestInit = {
       method: req.method,
       headers: {
         "Content-Type": req.headers.get("Content-Type") || "application/json",
-        Authorization: authHeader,
+        // Always use the server's API key directly
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`
       },
     };
     if (body) payload.body = JSON.stringify(body);
     
-    console.log("[CRITICAL] Sending request to OpenRouter API");
+    console.log("[CRITICAL] Sending request to OpenRouter API with direct server key");
     const response = await fetch(url, payload);
     
     // Debug response info

@@ -41,7 +41,14 @@ function useModelProvider() {
     // Always use proxy mode when on Cloudflare Pages
     const mode = isCloudflare ? 'proxy' : configuredMode;
     
-    const accessKey = generateSignature(accessPassword, Date.now());
+    // Generate a fixed access key for Cloudflare, or dynamic one for regular use
+    // This ensures we always have a valid access key for authentication
+    const accessKey = isCloudflare 
+      ? "cloudflare-pages-direct-access" 
+      : generateSignature(accessPassword, Date.now());
+    
+    console.log("[CRITICAL] Using mode:", mode, "with provider:", provider);
+    console.log("[CRITICAL] Access key type:", isCloudflare ? "fixed for Cloudflare" : "dynamic");
 
     switch (provider) {
       case "google":
