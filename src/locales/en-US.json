@@ -121,6 +121,7 @@
     "local": "Local",
     "proxy": "Proxy",
     "cloudflareMode": "Currently running on Cloudflare Pages. Proxy mode is automatically enabled.",
+    "openrouterServerKey": "Using server's OpenRouter API key. No need to provide your own key.",
     "apiKeyLabel": "Api Key",
     "apiKeyPlaceholder": "Please enter the Model Api Key",
     "apiUrlLabel": "Api Base Url",

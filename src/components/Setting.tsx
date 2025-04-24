@@ -476,6 +476,11 @@ function Setting({ open, onClose }: SettingProps) {
                           </SelectContent>
                         </Select>
                       </FormControl>
+                      {isCloudflare && provider === "openrouter" && (
+                        <div className="col-span-4 text-xs text-amber-500 mt-1">
+                          {t("setting.openrouterServerKey")}
+                        </div>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -538,7 +543,7 @@ function Setting({ open, onClose }: SettingProps) {
                   </div>
                   <div
                     className={cn("space-y-4", {
-                      hidden: provider !== "openrouter",
+                      hidden: provider !== "openrouter" || isCloudflare,
                     })}
                   >
                     <FormField

@@ -70,9 +70,13 @@ function useDeepResearch() {
   // Force to proxy mode if on Cloudflare Pages
   useEffect(() => {
     if (isCloudflare) {
-      const { mode, update } = useSettingStore.getState();
+      const { mode, provider, update } = useSettingStore.getState();
       if (mode !== 'proxy') {
         update({ mode: 'proxy' });
+      }
+      // Set OpenRouter as the default provider on Cloudflare
+      if (provider !== 'openrouter') {
+        update({ provider: 'openrouter' });
       }
     }
   }, []);

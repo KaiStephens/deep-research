@@ -289,8 +289,14 @@ function useModelProvider() {
   }
 
   function hasApiKey(): boolean {
-    const { provider } = useSettingStore.getState();
-
+    const { provider, mode: configuredMode } = useSettingStore.getState();
+    
+    // Always return true for API key check when on Cloudflare Pages
+    if (isCloudflare) {
+      return true;
+    }
+    
+    // Original provider-specific checks below
     switch (provider) {
       case "google":
         const { apiKey } = useSettingStore.getState();
