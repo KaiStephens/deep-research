@@ -20,9 +20,16 @@ import { multiApiKeyPolling } from "@/utils/model";
 import { generateSignature } from "@/utils/signature";
 import { completePath } from "@/utils/url";
 
+// Check if we're running in Cloudflare Pages
+const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+
 function useModelProvider() {
   function createProvider(model: string, settings?: any) {
-    const { mode, provider, accessPassword } = useSettingStore.getState();
+    const { mode: configuredMode, provider, accessPassword } = useSettingStore.getState();
+    
+    // Always use proxy mode when on Cloudflare Pages
+    const mode = isCloudflare ? 'proxy' : configuredMode;
+    
     const accessKey = generateSignature(accessPassword, Date.now());
 
     switch (provider) {

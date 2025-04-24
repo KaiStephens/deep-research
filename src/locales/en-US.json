@@ -120,6 +120,7 @@
     "modeTip": "In local mode, all requests are sent directly by the browser. In proxy mode, all requests are forwarded through the server.",
     "local": "Local",
     "proxy": "Proxy",
+    "cloudflareMode": "Currently running on Cloudflare Pages. Proxy mode is automatically enabled.",
     "apiKeyLabel": "Api Key",
     "apiKeyPlaceholder": "Please enter the Model Api Key",
     "apiUrlLabel": "Api Base Url",

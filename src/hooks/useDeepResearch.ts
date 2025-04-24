@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { streamText, smoothStream } from "ai";
 import { parsePartialJson } from "@ai-sdk/ui-utils";
 import { openai } from "@ai-sdk/openai";
@@ -25,6 +25,9 @@ import {
 import { isNetworkingModel } from "@/utils/model";
 import { parseError } from "@/utils/error";
 import { pick, flat } from "radash";
+
+// Check if we're running in Cloudflare Pages
+const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
 
 function getResponseLanguagePrompt(lang: string) {
   return `**Respond in ${lang}**`;
@@ -63,6 +66,16 @@ function useDeepResearch() {
   const { createProvider, getModel } = useModelProvider();
   const { tavily, firecrawl, exa, bocha, searxng } = useWebSearch();
   const [status, setStatus] = useState<string>("");
+  
+  // Force to proxy mode if on Cloudflare Pages
+  useEffect(() => {
+    if (isCloudflare) {
+      const { mode, update } = useSettingStore.getState();
+      if (mode !== 'proxy') {
+        update({ mode: 'proxy' });
+      }
+    }
+  }, []);
 
   async function askQuestions() {
     const { language } = useSettingStore.getState();

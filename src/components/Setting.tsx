@@ -79,6 +79,9 @@ import { researchStore } from "@/utils/storage";
 import { cn } from "@/utils/style";
 import { omit, capitalize } from "radash";
 
+// Check if we're running in Cloudflare Pages
+const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+
 type SettingProps = {
   open: boolean;
   onClose: () => void;
@@ -382,11 +385,12 @@ function Setting({ open, onClose }: SettingProps) {
                         </FormLabel>
                         <FormControl>
                           <Select
-                            value={field.value}
+                            value={isCloudflare ? 'proxy' : field.value}
                             onValueChange={(value) => {
                               field.onChange(value);
                               handleModeChange(value);
                             }}
+                            disabled={isCloudflare}
                           >
                             <SelectTrigger className="col-span-3">
                               <SelectValue />
@@ -401,6 +405,11 @@ function Setting({ open, onClose }: SettingProps) {
                             </SelectContent>
                           </Select>
                         </FormControl>
+                        {isCloudflare && (
+                          <div className="col-span-4 text-xs text-amber-500 mt-1">
+                            {t("setting.cloudflareMode")}
+                          </div>
+                        )}
                       </FormItem>
                     )}
                   />
