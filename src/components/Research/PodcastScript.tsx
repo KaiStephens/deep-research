@@ -116,7 +116,7 @@ function PodcastScript() {
             className="min-h-72"
             value={taskStore.podcastScript}
             onChange={(value) => taskStore.updatePodcastScript(value)}
-            defaultEditable={false}
+            editable={false}
             tools={
               <>
                 <div className="px-1">
