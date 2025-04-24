@@ -124,6 +124,11 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/ai/openrouter")) {
     const authorization = request.headers.get("authorization") || "";
     const isDisabledModel = await hasDisabledAIModel();
+    
+    // Log information for debugging API key issues
+    console.log("[CRITICAL] OpenRouter API request received");
+    console.log("[CRITICAL] OpenRouter API key available:", !!OPENROUTER_API_KEY);
+    
     if (
       !verifySignature(
         authorization.substring(7),
@@ -133,6 +138,7 @@ export async function middleware(request: NextRequest) {
       disabledAIProviders.includes("openrouter") ||
       isDisabledModel
     ) {
+      console.log("[CRITICAL] OpenRouter request rejected: signature verification failed");
       return NextResponse.json(
         { error: ERRORS.NO_PERMISSIONS },
         { status: 403 }
@@ -140,6 +146,7 @@ export async function middleware(request: NextRequest) {
     } else {
       const apiKey = multiApiKeyPolling(OPENROUTER_API_KEY);
       if (apiKey) {
+        console.log("[CRITICAL] OpenRouter API request proceeding with valid server key");
         const requestHeaders = new Headers();
         requestHeaders.set(
           "Content-Type",
@@ -152,6 +159,7 @@ export async function middleware(request: NextRequest) {
           },
         });
       } else {
+        console.error("[CRITICAL] OpenRouter API key missing on server");
         return NextResponse.json(
           {
             error: ERRORS.NO_API_KEY,

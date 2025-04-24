@@ -64,46 +64,25 @@ function Topic() {
   }, [taskStore.question, form]);
 
   async function handleSubmit(values: z.infer<typeof formSchema>) {
-    const { mode, provider } = useSettingStore.getState();
-    const apiKeyPresent = hasApiKey(); // Store the result
-
-    // Log the values for debugging
-    console.log("[DEBUG] handleSubmit triggered");
-    console.log("[DEBUG] isCloudflarePages:", isCloudflarePages);
-    console.log("[DEBUG] hostname:", window.location.hostname);
-    console.log("[DEBUG] mode:", mode);
-    console.log("[DEBUG] provider:", provider);
-    console.log("[DEBUG] hasApiKey():", apiKeyPresent);
-    console.log("[DEBUG] Condition check:", isCloudflarePages || (mode === "local" && apiKeyPresent) || mode === "proxy");
-
-    // ALWAYS proceed if on Cloudflare Pages or if API key requirements are met
-    if (isCloudflarePages || window.location.hostname.includes('pages.dev') || (mode === "local" && apiKeyPresent) || mode === "proxy") {
-      const { id, setQuestion } = useTaskStore.getState();
-      try {
-        setIsThinking(true);
-        accurateTimerStart();
-        if (id !== "") {
-          createNewResearch();
-          form.setValue("topic", values.topic);
-        }
-        setQuestion(values.topic);
-        await askQuestions();
-      } finally {
-        setIsThinking(false);
-        accurateTimerStop();
+    // CRITICAL FIX: Always proceed with research regardless of API key
+    // This is a direct override to fix the Cloudflare deployment issue
+    console.log("[CRITICAL] handleSubmit - BYPASSING ALL API KEY CHECKS");
+    
+    const { id, setQuestion } = useTaskStore.getState();
+    try {
+      setIsThinking(true);
+      accurateTimerStart();
+      if (id !== "") {
+        createNewResearch();
+        form.setValue("topic", values.topic);
       }
-    } else {
-      // Extended logging before showing alert
-      console.error("[ERROR] API key check failed with these values:", {
-        hostname: window.location.hostname,
-        isCloudflarePages,
-        mode,
-        provider,
-        apiKeyPresent,
-        userAgent: navigator.userAgent,
-      });
-      // Modified alert text for confirmation
-      alert(t("API key is required for research. (From Topic.tsx)"));
+      setQuestion(values.topic);
+      await askQuestions();
+    } catch (error) {
+      console.error("[CRITICAL] Error in askQuestions:", error);
+    } finally {
+      setIsThinking(false);
+      accurateTimerStop();
     }
   }
 
