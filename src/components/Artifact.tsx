@@ -16,7 +16,7 @@ import {
   LoaderCircle,
   ScrollText,
 } from "lucide-react";
-import { Button } from "@/components/Internal/Button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,8 +32,6 @@ type Props = {
   buttonClassName?: string;
   dropdownMenuSide?: "top" | "right" | "bottom" | "left";
   dropdownMenuSideOffset?: number;
-  tooltipSide?: "top" | "right" | "bottom" | "left";
-  tooltipSideOffset?: number;
 };
 
 function Artifact(props: Props) {
@@ -44,8 +42,6 @@ function Artifact(props: Props) {
     buttonClassName,
     dropdownMenuSide = "left",
     dropdownMenuSideOffset = 0,
-    tooltipSide = "left",
-    tooltipSideOffset = 0,
   } = props;
   const { t } = useTranslation();
   const {
@@ -66,8 +62,6 @@ function Artifact(props: Props) {
             size="icon"
             variant="ghost"
             title={t("artifact.readingLevel")}
-            side={tooltipSide}
-            sideoffset={tooltipSideOffset}
             disabled={loadingAction !== ""}
           >
             {loadingAction === "readingLevel" ? (
@@ -127,8 +121,6 @@ function Artifact(props: Props) {
             size="icon"
             variant="ghost"
             title={t("artifact.adjustLength")}
-            side={tooltipSide}
-            sideoffset={tooltipSideOffset}
             disabled={loadingAction !== ""}
           >
             {loadingAction === "adjustLength" ? (
@@ -196,8 +188,6 @@ function Artifact(props: Props) {
             size="icon"
             variant="ghost"
             title={t("artifact.translate")}
-            side={tooltipSide}
-            sideoffset={tooltipSideOffset}
             disabled={loadingAction !== ""}
           >
             {loadingAction === "translate" ? (
@@ -291,8 +281,6 @@ function Artifact(props: Props) {
         size="icon"
         variant="ghost"
         title={t("artifact.continuation")}
-        side={tooltipSide}
-        sideoffset={tooltipSideOffset}
         disabled={loadingAction !== ""}
         onClick={() => continuation(systemInstruction)}
       >

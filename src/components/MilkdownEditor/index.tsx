@@ -1,21 +1,20 @@
 "use client";
 import {
   useRef,
-  useLayoutEffect,
   useState,
   type ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { Pencil, Save, CodeXml, Eye } from "lucide-react";
 import { Crepe } from "@milkdown/crepe";
-import { editorViewOptionsCtx } from "@milkdown/kit/core";
+import { editorViewOptionsCtx, editorViewCtx } from "@milkdown/kit/core";
 import { replaceAll } from "@milkdown/kit/utils";
 import { diagram } from "@xiangfa/milkdown-plugin-diagram";
 import { math } from "@xiangfa/milkdown-plugin-math";
 import { MarkdownEditor } from "@xiangfa/mdeditor";
 import FloatingMenu from "@/components/Internal/FloatingMenu";
-import { Button } from "@/components/Internal/Button";
 import { cn } from "@/utils/style";
 
 import "@milkdown/crepe/theme/common/style.css";
@@ -34,138 +33,249 @@ function MilkdownEditor(props: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const milkdownEditorRef = useRef<HTMLDivElement>(null);
   const markdownEditorRef = useRef<HTMLDivElement>(null);
-  const [milkdownEditor, setMilkdownEditor] = useState<Crepe>();
-  const [markdownEditor, setMarkdownEditor] = useState<MarkdownEditor>();
+  const [milkdownEditor, setMilkdownEditor] = useState<Crepe | null>(null);
+  const [markdownEditor, setMarkdownEditor] = useState<MarkdownEditor | null>(null);
   const [mode, setMode] = useState<"markdown" | "WYSIWYM">("WYSIWYM");
   const [editable, setEditable] = useState<boolean>(false);
   const [markdown, setMarkdown] = useState<string>(defaultValue);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleEditable(enable: boolean) {
-    milkdownEditor?.setReadonly(!enable);
-    setEditable(enable);
-  }
+  // Safe wrapper for milkdown operations
+  const safelyApplyMilkdownOperation = useCallback((operation: (editor: Crepe) => void) => {
+    if (!milkdownEditor) return;
+    
+    try {
+      operation(milkdownEditor);
+    } catch (err) {
+      console.error('Milkdown operation error:', err);
+      setError(String(err));
+    }
+  }, [milkdownEditor]);
 
-  function updateContent(content: string) {
+  const handleEditable = useCallback((enable: boolean) => {
+    safelyApplyMilkdownOperation((editor) => {
+      editor.setReadonly(!enable);
+      setEditable(enable);
+    });
+  }, [safelyApplyMilkdownOperation]);
+
+  const updateContent = useCallback((content: string) => {
     if (mode === "WYSIWYM") {
-      if (milkdownEditor?.editor.status === "Created") {
-        replaceAll(content)(milkdownEditor.editor.ctx);
-      }
+      safelyApplyMilkdownOperation((editor) => {
+        if (editor.editor.status === "Created") {
+          try {
+            const ctx = editor.editor.ctx;
+            if (ctx && ctx.get(editorViewCtx)) {
+              replaceAll(content)(ctx);
+            }
+          } catch (err) {
+            console.error('Failed to update Milkdown content:', err);
+          }
+        }
+      });
     } else if (mode === "markdown") {
       if (markdownEditor?.status === "create") {
         markdownEditor.update(content);
       }
     }
-  }
+  }, [mode, markdownEditor, safelyApplyMilkdownOperation]);
 
-  function changeMode(mode: "markdown" | "WYSIWYM") {
-    updateContent(markdown);
-    setMode(mode);
-    if (!editable) handleEditable(true);
-  }
+  const changeMode = useCallback((newMode: "markdown" | "WYSIWYM") => {
+    try {
+      updateContent(markdown);
+      setMode(newMode);
+      if (!editable) handleEditable(true);
+    } catch (err) {
+      console.error('Mode change error:', err);
+    }
+  }, [markdown, editable, handleEditable, updateContent]);
 
-  function save() {
-    changeMode("WYSIWYM");
-    handleEditable(false);
-    onChange(markdown);
-  }
+  const save = useCallback(() => {
+    try {
+      changeMode("WYSIWYM");
+      handleEditable(false);
+      onChange(markdown);
+    } catch (err) {
+      console.error('Save error:', err);
+    }
+  }, [changeMode, handleEditable, markdown, onChange]);
 
-  // Update editor content when external data changes, such as data streams received from a server
+  // Update editor content when external data changes
   useEffect(() => {
-    if (mode === "WYSIWYM") {
-      if (milkdownEditor?.editor.status === "Created") {
-        replaceAll(defaultValue)(milkdownEditor.editor.ctx);
-      }
-    } else if (mode === "markdown") {
-      if (markdownEditor?.status === "create") {
+    if (defaultValue === markdown) return;
+    
+    try {
+      if (mode === "WYSIWYM" && milkdownEditor?.editor.status === "Created") {
+        const ctx = milkdownEditor.editor.ctx;
+        if (ctx && ctx.get(editorViewCtx)) {
+          replaceAll(defaultValue)(ctx);
+        }
+      } else if (mode === "markdown" && markdownEditor?.status === "create") {
         markdownEditor.update(defaultValue);
       }
+      setMarkdown(defaultValue);
+    } catch (err) {
+      console.error('Failed to update content from props:', err);
     }
-  }, [mode, milkdownEditor, markdownEditor, defaultValue]);
+  }, [mode, milkdownEditor, markdownEditor, defaultValue, markdown]);
 
   // Initialize the WYSIWYM editor
-  useLayoutEffect(() => {
-    const crepe = new Crepe({
-      root: milkdownEditorRef.current,
-      defaultValue: "",
-      features: {
-        [Crepe.Feature.ImageBlock]: false,
-        [Crepe.Feature.Latex]: false,
-      },
-      featureConfigs: {
-        [Crepe.Feature.Placeholder]: {
-          text: t("editor.placeholder"),
-        },
-        [Crepe.Feature.BlockEdit]: {
-          slashMenuTextGroupLabel: t("editor.text"),
-          slashMenuListGroupLabel: t("editor.list"),
-          slashMenuAdvancedGroupLabel: t("editor.advanced"),
-          slashMenuTextLabel: t("editor.text"),
-          slashMenuH1Label: t("editor.h1"),
-          slashMenuH2Label: t("editor.h2"),
-          slashMenuH3Label: t("editor.h3"),
-          slashMenuH4Label: t("editor.h4"),
-          slashMenuH5Label: t("editor.h5"),
-          slashMenuH6Label: t("editor.h6"),
-          slashMenuQuoteLabel: t("editor.quote"),
-          slashMenuDividerLabel: t("editor.divider"),
-          slashMenuBulletListLabel: t("editor.bulletList"),
-          slashMenuOrderedListLabel: t("editor.orderedList"),
-          slashMenuTaskListLabel: t("editor.taskList"),
-          slashMenuImageLabel: t("editor.image"),
-          slashMenuCodeBlockLabel: t("editor.codeBlock"),
-          slashMenuTableLabel: t("editor.table"),
-          slashMenuMathLabel: t("editor.math"),
-        },
-      },
-    });
-    crepe.editor.config((ctx) => {
-      // Add attributes to the editor container
-      ctx.update(editorViewOptionsCtx, (prev) => ({
-        ...prev,
-        attributes: {
-          class: "milkdown-editor mx-auto outline-none",
-          spellcheck: "false",
-        },
-      }));
-    });
+  useEffect(() => {
+    if (!milkdownEditorRef.current) return;
+    
+    let crepe: Crepe | null = null;
 
-    crepe
-      .setReadonly(true)
-      .create()
-      .then(() => {
-        setMilkdownEditor(crepe);
+    try {
+      crepe = new Crepe({
+        root: milkdownEditorRef.current,
+        defaultValue: defaultValue || "",
+        features: {
+          [Crepe.Feature.ImageBlock]: false,
+          [Crepe.Feature.Latex]: false,
+        },
+        featureConfigs: {
+          [Crepe.Feature.Placeholder]: {
+            text: t("editor.placeholder"),
+          },
+          [Crepe.Feature.BlockEdit]: {
+            slashMenuTextGroupLabel: t("editor.text"),
+            slashMenuListGroupLabel: t("editor.list"),
+            slashMenuAdvancedGroupLabel: t("editor.advanced"),
+            slashMenuTextLabel: t("editor.text"),
+            slashMenuH1Label: t("editor.h1"),
+            slashMenuH2Label: t("editor.h2"),
+            slashMenuH3Label: t("editor.h3"),
+            slashMenuH4Label: t("editor.h4"),
+            slashMenuH5Label: t("editor.h5"),
+            slashMenuH6Label: t("editor.h6"),
+            slashMenuQuoteLabel: t("editor.quote"),
+            slashMenuDividerLabel: t("editor.divider"),
+            slashMenuBulletListLabel: t("editor.bulletList"),
+            slashMenuOrderedListLabel: t("editor.orderedList"),
+            slashMenuTaskListLabel: t("editor.taskList"),
+            slashMenuImageLabel: t("editor.image"),
+            slashMenuCodeBlockLabel: t("editor.codeBlock"),
+            slashMenuTableLabel: t("editor.table"),
+            slashMenuMathLabel: t("editor.math"),
+          },
+        },
       });
-    crepe.editor.use(diagram).use(math);
 
-    crepe.on((listener) => {
-      listener.markdownUpdated((ctx, markdown) => {
-        setMarkdown(markdown);
+      crepe.editor.config((ctx) => {
+        ctx.update(editorViewOptionsCtx, (prev) => ({
+          ...prev,
+          attributes: {
+            class: "milkdown-editor mx-auto outline-none",
+            spellcheck: "false",
+          },
+        }));
       });
-    });
 
-    return () => {
-      crepe.destroy();
-    };
-  }, [t]);
+      crepe.editor.use(diagram).use(math);
+
+      crepe.on((listener) => {
+        listener.markdownUpdated((ctx, markdown) => {
+          setMarkdown(markdown);
+        });
+      });
+
+      crepe
+        .setReadonly(true)
+        .create()
+        .then(() => {
+          setMilkdownEditor(crepe);
+          if (defaultValue) {
+            setTimeout(() => {
+              try {
+                if (crepe && crepe.editor.status === "Created") {
+                  replaceAll(defaultValue)(crepe.editor.ctx);
+                }
+              } catch (err) {
+                console.error('Initial content setting error:', err);
+              }
+            }, 100);
+          }
+        })
+        .catch(err => {
+          console.error('Milkdown creation error:', err);
+          setError(`Failed to initialize editor: ${err.message}`);
+        });
+
+      return () => {
+        if (crepe) {
+          try {
+            crepe.destroy();
+          } catch (e) {
+            console.error('Error destroying Milkdown editor:', e);
+          }
+        }
+      };
+    } catch (err) {
+      console.error('Milkdown initialization error:', err);
+      setError(`Editor initialization failed: ${err}`);
+      return () => {};
+    }
+  }, [t, defaultValue]);
 
   // Initialize the Markdown editor
-  useLayoutEffect(() => {
-    const editor = new MarkdownEditor({
-      root: markdownEditorRef.current,
-      defaultValue: "",
-      onChange: (value) => {
-        setMarkdown(value);
-      },
-    });
+  useEffect(() => {
+    if (!markdownEditorRef.current) return;
+    
+    let editor: MarkdownEditor | null = null;
 
-    editor.create().then(() => {
-      setMarkdownEditor(editor);
-    });
+    try {
+      editor = new MarkdownEditor({
+        root: markdownEditorRef.current,
+        defaultValue: defaultValue || "",
+        onChange: (value) => {
+          setMarkdown(value);
+        },
+      });
 
-    return () => {
-      editor.destroy();
-    };
-  }, []);
+      editor.create()
+        .then(() => {
+          setMarkdownEditor(editor);
+        })
+        .catch(err => {
+          console.error('Markdown editor creation error:', err);
+        });
+
+      return () => {
+        if (editor) {
+          try {
+            editor.destroy();
+          } catch (e) {
+            console.error('Error destroying Markdown editor:', e);
+          }
+        }
+      };
+    } catch (err) {
+      console.error('Markdown editor initialization error:', err);
+      return () => {};
+    }
+  }, [defaultValue]);
+
+  // If there's an error, show a simple fallback editor
+  if (error) {
+    return (
+      <div className={cn("relative border p-4 rounded", className)}>
+        <textarea
+          className="w-full h-full min-h-40 p-2 border rounded bg-transparent"
+          value={markdown}
+          onChange={(e) => {
+            setMarkdown(e.target.value);
+            onChange(e.target.value);
+          }}
+        />
+        <button 
+          className="absolute top-2 right-2 text-xs text-red-500 hover:text-red-700"
+          onClick={() => setError(null)}
+        >
+          Reset Editor
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("relative", className)} ref={containerRef}>
@@ -188,52 +298,42 @@ function MilkdownEditor(props: EditorProps) {
       <FloatingMenu targetRef={containerRef} fixedTopOffset={16}>
         <div className="flex flex-col gap-1 border rounded-full py-2 p-1 bg-white dark:bg-slate-800 opacity-50 max-sm:opacity-80 print:hidden hover:opacity-100">
           {mode === "WYSIWYM" ? (
-            <Button
-              className="float-menu-button"
+            <button
+              className="w-9 h-9 rounded-full inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700"
               title="Markdown"
-              side="left"
-              sideoffset={8}
-              variant="ghost"
               onClick={() => changeMode("markdown")}
+              type="button"
             >
-              <CodeXml />
-            </Button>
+              <CodeXml className="w-5 h-5" />
+            </button>
           ) : (
-            <Button
-              className="float-menu-button"
+            <button
+              className="w-9 h-9 rounded-full inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700"
               title={t("editor.WYSIWYM")}
-              side="left"
-              sideoffset={8}
-              variant="ghost"
               onClick={() => changeMode("WYSIWYM")}
+              type="button"
             >
-              <Eye />
-            </Button>
+              <Eye className="w-5 h-5" />
+            </button>
           )}
           {editable ? (
-            <Button
-              className="float-menu-button"
+            <button
+              className="w-9 h-9 rounded-full inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700"
               title={t("editor.save")}
-              side="left"
-              sideoffset={8}
-              size="icon"
-              variant="ghost"
               onClick={() => save()}
+              type="button"
             >
-              <Save />
-            </Button>
+              <Save className="w-5 h-5" />
+            </button>
           ) : (
-            <Button
-              className="float-menu-button"
+            <button
+              className="w-9 h-9 rounded-full inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700"
               title={t("editor.edit")}
-              side="left"
-              sideoffset={8}
-              size="icon"
-              variant="ghost"
               onClick={() => handleEditable(true)}
+              type="button"
             >
-              <Pencil />
-            </Button>
+              <Pencil className="w-5 h-5" />
+            </button>
           )}
           {tools ? tools : null}
         </div>

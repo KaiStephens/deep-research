@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Crepe } from "@milkdown/crepe";
 import { replaceAll, getHTML } from "@milkdown/kit/utils";
-import { Button } from "@/components/Internal/Button";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -35,7 +35,14 @@ import useDeepResearch from "@/hooks/useDeepResearch";
 import { useTaskStore } from "@/store/task";
 import { downloadFile } from "@/utils/file";
 
-const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"));
+const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-40 bg-slate-50 dark:bg-slate-800 animate-pulse rounded-md">
+      <p className="text-slate-500">Loading editor...</p>
+    </div>
+  )
+});
 
 const formSchema = z.object({
   suggestion: z.string().optional(),
@@ -200,8 +207,6 @@ function SearchResult() {
                             size="icon"
                             variant="ghost"
                             title={t("research.common.delete")}
-                            side="left"
-                            sideoffset={8}
                             onClick={() => handleRemove(item.query)}
                           >
                             <Trash />
@@ -215,8 +220,6 @@ function SearchResult() {
                             size="icon"
                             variant="ghost"
                             title={t("editor.export")}
-                            side="left"
-                            sideoffset={8}
                             onClick={() =>
                               downloadFile(
                                 getSearchResultContent(item),

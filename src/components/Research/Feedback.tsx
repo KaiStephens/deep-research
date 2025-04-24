@@ -19,7 +19,14 @@ import useDeepResearch from "@/hooks/useDeepResearch";
 import useAccurateTimer from "@/hooks/useAccurateTimer";
 import { useTaskStore } from "@/store/task";
 
-const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"));
+const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-40 bg-slate-50 dark:bg-slate-800 animate-pulse rounded-md">
+      <p className="text-slate-500">Loading editor...</p>
+    </div>
+  )
+});
 
 const formSchema = z.object({
   feedback: z.string(),
