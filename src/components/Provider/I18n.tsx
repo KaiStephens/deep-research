@@ -5,8 +5,6 @@ import { useSettingStore } from "@/store/setting";
 import i18n from "@/utils/i18n";
 
 function I18Provider({ children }: { children: React.ReactNode }) {
-  const { language } = useSettingStore();
-
   useLayoutEffect(() => {
     const settingStore = useSettingStore.getState();
     // Always use English
