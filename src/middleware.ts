@@ -122,9 +122,6 @@ export async function middleware(request: NextRequest) {
     }
   }
   if (request.nextUrl.pathname.startsWith("/api/ai/openrouter")) {
-    const authorization = request.headers.get("authorization") || "";
-    const isDisabledModel = await hasDisabledAIModel();
-    
     // Log information for debugging API key issues
     console.log("[CRITICAL] OpenRouter API request received");
     console.log("[CRITICAL] OpenRouter API key available:", !!OPENROUTER_API_KEY);
