@@ -10,8 +10,8 @@ import "./globals.css";
 const HEAD_SCRIPTS = process.env.HEAD_SCRIPTS as string;
 
 export const metadata: Metadata = {
-  title: "Deep Research",
-  description: "Use any LLMs (Large Language Models) for Deep Research.",
+  title: "DeepPod",
+  description: "LLM research assistant by Kai Stephens",
   icons: {
     icon: {
       type: "image/svg+xml",
@@ -45,7 +45,8 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange
+          storageKey="deepPod-theme"
+          forcedTheme={undefined}
         >
           <I18Provider>{children}</I18Provider>
         </ThemeProvider>

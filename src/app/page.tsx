@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
@@ -17,14 +17,24 @@ const History = dynamic(() => import("@/components/History"));
 
 function Home() {
   const globalStore = useGlobalStore();
-
-  const { theme } = useSettingStore();
+  const settingStore = useSettingStore();
   const { setTheme } = useTheme();
 
-  useLayoutEffect(() => {
-    const settingStore = useSettingStore.getState();
-    setTheme(settingStore.theme);
-  }, [theme, setTheme]);
+  // Use effect instead of layoutEffect for better SSR compatibility
+  useEffect(() => {
+    const storedTheme = settingStore.theme;
+    if (storedTheme && storedTheme !== 'system') {
+      setTheme(storedTheme);
+      
+      // Force document class update for immediate visual feedback
+      if (storedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [settingStore.theme, setTheme]);
+
   return (
     <div className="max-w-screen-md mx-auto px-4 pb-16">
       <Header />
