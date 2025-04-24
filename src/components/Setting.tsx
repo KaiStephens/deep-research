@@ -239,6 +239,17 @@ function Setting({ open, onClose }: SettingProps) {
 
   const isDisabledAIProvider = useCallback(
     (provider: string) => {
+      // If on Cloudflare Pages, no provider should be disabled
+      const isCloudflare = typeof window !== 'undefined' && (
+        window.location.hostname.includes('pages.dev') || 
+        document.cookie.includes('__cf') || 
+        navigator.userAgent.includes('Cloudflare')
+      );
+      
+      if (isCloudflare) {
+        return false;
+      }
+      
       const disabledAIProviders =
         mode === "proxy" && DISABLED_AI_PROVIDER.length > 0
           ? DISABLED_AI_PROVIDER.split(",")

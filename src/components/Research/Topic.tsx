@@ -16,8 +16,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import useDeepResearch from "@/hooks/useDeepResearch";
 import useAccurateTimer from "@/hooks/useAccurateTimer";
-import useAiProvider from "@/hooks/useAiProvider";
-import { useSettingStore } from "@/store/setting";
 import { useTaskStore } from "@/store/task";
 import { useHistoryStore } from "@/store/history";
 
@@ -44,7 +42,6 @@ function Topic() {
   const { t } = useTranslation();
   const taskStore = useTaskStore();
   const { askQuestions } = useDeepResearch();
-  const { hasApiKey } = useAiProvider();
   const {
     formattedTime,
     start: accurateTimerStart,
