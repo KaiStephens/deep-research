@@ -1,7 +1,7 @@
 "use client";
 import { useTranslation } from "react-i18next";
 import { History } from "lucide-react";
-import { Button } from "@/components/Internal/Button";
+import { Button } from "@/components/ui/button";
 import { useGlobalStore } from "@/store/global";
 import ThemeToggle from "@/components/ThemeToggle";
 

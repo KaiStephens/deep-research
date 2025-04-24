@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/Internal/Button";
 import { useTranslation } from "react-i18next";
 import { useSettingStore } from "@/store/setting";
 
@@ -18,62 +17,48 @@ export function ThemeToggle() {
     setMounted(true);
   }, []);
   
-  // Update store only when theme changes and component is mounted
+  // Update store when theme changes and component is mounted
   useEffect(() => {
-    if (mounted && resolvedTheme) {
+    if (mounted && resolvedTheme && settingStore.theme !== resolvedTheme) {
       try {
-        // Only update if the theme in the store doesn't match the resolved theme
-        if (settingStore.theme !== resolvedTheme) {
-          settingStore.update({ theme: resolvedTheme });
-        }
+        settingStore.update({ theme: resolvedTheme });
       } catch (error) {
         console.error("Error updating theme in store:", error);
       }
     }
-  }, [resolvedTheme, settingStore, mounted]);
+  }, [mounted, resolvedTheme, settingStore]);
 
-  // Memoize the toggle function to prevent recreation on each render
-  const toggleTheme = useCallback(() => {
-    try {
-      const currentTheme = resolvedTheme || 'light';
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      setTheme(newTheme);
-    } catch (error) {
-      console.error("Error toggling theme:", error);
-    }
-  }, [resolvedTheme, setTheme]);
+  const toggleTheme = () => {
+    if (!mounted) return;
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+  };
 
-  // Don't access theme for rendering until after client-side hydration is complete
+  // Don't try to render theme-dependent UI until hydrated
   if (!mounted) {
-    // Render static placeholder button identical on server and client
     return (
-      <Button
-        className="h-8 w-8"
+      <button 
+        className="h-8 w-8 rounded-md inline-flex items-center justify-center"
         title={t("switchTheme")}
-        variant="ghost"
-        size="icon"
       >
         <div className="h-5 w-5" />
-      </Button>
+      </button>
     );
   }
   
-  const isDark = resolvedTheme === "dark";
-
+  // Only show themed button after mounting to prevent hydration issues
   return (
-    <Button
-      className="h-8 w-8"
+    <button
+      className="h-8 w-8 rounded-md inline-flex items-center justify-center hover:bg-accent"
       title={t("switchTheme")}
-      variant="ghost"
-      size="icon"
       onClick={toggleTheme}
     >
-      {isDark ? (
+      {resolvedTheme === "dark" ? (
         <Sun className="h-5 w-5" />
       ) : (
         <Moon className="h-5 w-5" />
       )}
-    </Button>
+    </button>
   );
 }
 
