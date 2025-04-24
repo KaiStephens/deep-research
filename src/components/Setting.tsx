@@ -80,7 +80,10 @@ import { cn } from "@/utils/style";
 import { omit, capitalize } from "radash";
 
 // Check if we're running in Cloudflare Pages
-const isCloudflare = typeof window !== 'undefined' && window.location.hostname.includes('pages.dev');
+const isCloudflare = typeof window !== 'undefined' && (
+  window.location.hostname.includes('pages.dev') || 
+  window.location.hostname === 'deep.kaios.ca'
+);
 
 type SettingProps = {
   open: boolean;
@@ -242,6 +245,7 @@ function Setting({ open, onClose }: SettingProps) {
       // If on Cloudflare Pages, no provider should be disabled
       const isCloudflare = typeof window !== 'undefined' && (
         window.location.hostname.includes('pages.dev') || 
+        window.location.hostname === 'deep.kaios.ca' ||
         document.cookie.includes('__cf') || 
         navigator.userAgent.includes('Cloudflare')
       );

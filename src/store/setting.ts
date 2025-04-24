@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 // Check if we're running in Cloudflare Pages with multiple detection methods
 const isCloudflare = typeof window !== 'undefined' && (
   window.location.hostname.includes('pages.dev') || 
+  window.location.hostname === 'deep.kaios.ca' ||
   // Additional tests that might help detect Cloudflare environment
   document.cookie.includes('__cf') || 
   navigator.userAgent.includes('Cloudflare')
@@ -133,7 +134,7 @@ export const defaultValues: SettingStore = {
 };
 
 // Ensure Cloudflare settings are enforced
-if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+if (isCloudflare || (typeof window !== 'undefined' && (window.location.hostname.includes('pages.dev') || window.location.hostname === 'deep.kaios.ca'))) {
   console.log("[CRITICAL] Setting default values for Cloudflare");
   defaultValues.mode = "proxy";
   defaultValues.provider = "openrouter";
@@ -146,7 +147,7 @@ export const useSettingStore = create(
       update: (values) => {
         // Force proxy mode and openrouter provider if on Cloudflare
         const valuesToSet = { ...values };
-        if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+        if (isCloudflare || (typeof window !== 'undefined' && (window.location.hostname.includes('pages.dev') || window.location.hostname === 'deep.kaios.ca'))) {
           if (valuesToSet.mode && valuesToSet.mode !== 'proxy') {
             console.log("[CRITICAL] Forcing proxy mode for Cloudflare");
             valuesToSet.mode = 'proxy';
@@ -160,7 +161,7 @@ export const useSettingStore = create(
       },
       reset: () => {
         // When resetting, ensure Cloudflare-specific settings are preserved
-        if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+        if (isCloudflare || (typeof window !== 'undefined' && (window.location.hostname.includes('pages.dev') || window.location.hostname === 'deep.kaios.ca'))) {
           console.log("[CRITICAL] Reset called - enforcing Cloudflare settings");
           set({
             ...defaultValues,

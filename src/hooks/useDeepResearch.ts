@@ -29,6 +29,7 @@ import { pick, flat } from "radash";
 // Check if we're running in Cloudflare Pages with multiple detection methods
 const isCloudflare = typeof window !== 'undefined' && (
   window.location.hostname.includes('pages.dev') || 
+  window.location.hostname === 'deep.kaios.ca' ||
   // Additional tests that might help detect Cloudflare environment
   document.cookie.includes('__cf') || 
   navigator.userAgent.includes('Cloudflare')
@@ -80,7 +81,7 @@ function useDeepResearch() {
   
   // Force to proxy mode if on Cloudflare Pages
   useEffect(() => {
-    if (isCloudflare || (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev'))) {
+    if (isCloudflare || (typeof window !== 'undefined' && (window.location.hostname.includes('pages.dev') || window.location.hostname === 'deep.kaios.ca'))) {
       console.log("[CRITICAL] useDeepResearch - Forcing proxy mode and OpenRouter provider");
       const { mode, provider, update } = useSettingStore.getState();
       if (mode !== 'proxy') {

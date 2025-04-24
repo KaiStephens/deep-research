@@ -23,6 +23,7 @@ import { completePath } from "@/utils/url";
 // Check if we're running in Cloudflare Pages with multiple detection methods
 const isCloudflare = typeof window !== 'undefined' && (
   window.location.hostname.includes('pages.dev') || 
+  window.location.hostname === 'deep.kaios.ca' ||
   // Additional tests that might help detect Cloudflare environment
   document.cookie.includes('__cf') || 
   navigator.userAgent.includes('Cloudflare')
