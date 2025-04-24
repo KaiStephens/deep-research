@@ -19,7 +19,7 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // Log warning if OpenRouter API key is missing
 if (!OPENROUTER_API_KEY) {
-  console.error("WARNING: OPENROUTER_API_KEY environment variable is not set. Requests will fail!");
+  console.error("CRITICAL ERROR: OPENROUTER_API_KEY environment variable is not set. Requests will fail!");
 }
 
 async function handler(req: NextRequest) {
@@ -27,6 +27,12 @@ async function handler(req: NextRequest) {
   console.log("[CRITICAL] OpenRouter route handler called, API KEY EXISTS:", !!OPENROUTER_API_KEY);
   console.log("[CRITICAL] Request URL:", req.url);
   console.log("[CRITICAL] Request method:", req.method);
+  
+  // Get host for HTTP-Referer
+  const host = req.headers.get("host") || "deep-research.pages.dev";
+  const protocol = host.includes("localhost") ? "http" : "https";
+  const refererUrl = `${protocol}://${host}/`;
+  console.log("[CRITICAL] Using referer:", refererUrl);
   
   let body;
   let parsedBody: any = {};
@@ -59,12 +65,11 @@ async function handler(req: NextRequest) {
     if (params) url += `?${params}`;
     console.log("[CRITICAL] OpenRouter forwarding to:", url);
     
-    // DIRECT FIX: Always use the server API key directly rather than relying on the request header
-    // This bypasses any client-side authentication issues
+    // CRITICAL CHECK: Ensure the API key is available
     if (!OPENROUTER_API_KEY) {
       console.error("[CRITICAL] OPENROUTER_API_KEY is not set in environment variables!");
       return NextResponse.json(
-        { error: "No API key configured on server" },
+        { error: "Server configuration error: No API key available" },
         { status: 500 }
       );
     }
@@ -87,7 +92,8 @@ async function handler(req: NextRequest) {
     }
     
     // Add HTTP-Referer header for OpenRouter (required)
-    headers.set("HTTP-Referer", "https://deep-research.pages.dev/");
+    // Use the current host instead of a hardcoded value
+    headers.set("HTTP-Referer", refererUrl);
     
     // Add X-Title header for OpenRouter
     headers.set("X-Title", "Deep Research");
@@ -116,12 +122,26 @@ async function handler(req: NextRequest) {
         // Try to parse error as JSON for better reporting
         const errorJson = JSON.parse(errorText);
         console.error("[CRITICAL] OpenRouter API error (JSON):", response.status, JSON.stringify(errorJson));
-        return NextResponse.json(errorJson, { status: response.status });
+        
+        // Add explicit error classification to help client-side debugging
+        const enhancedErrorJson = {
+          ...errorJson,
+          source: "openrouter_server_proxy", 
+          status: response.status,
+          timestamp: new Date().toISOString()
+        };
+        
+        return NextResponse.json(enhancedErrorJson, { status: response.status });
       } catch (_) {
         // Fallback to raw error text
         console.error("[CRITICAL] OpenRouter API error (text):", response.status, errorText);
         return NextResponse.json(
-          { code: response.status, message: errorText },
+          { 
+            code: response.status, 
+            message: errorText,
+            source: "openrouter_server_proxy",
+            timestamp: new Date().toISOString()
+          },
           { status: response.status }
         );
       }
@@ -140,12 +160,23 @@ async function handler(req: NextRequest) {
     console.error("[CRITICAL] OpenRouter handler critical error:", error);
     if (error instanceof Error) {
       return NextResponse.json(
-        { code: 500, message: error.message, stack: error.stack },
+        { 
+          code: 500, 
+          message: error.message, 
+          stack: error.stack,
+          source: "openrouter_server_proxy",
+          timestamp: new Date().toISOString()
+        },
         { status: 500 }
       );
     }
     return NextResponse.json(
-      { code: 500, message: "Unknown error in OpenRouter API route" },
+      { 
+        code: 500, 
+        message: "Unknown error in OpenRouter API route",
+        source: "openrouter_server_proxy",
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }

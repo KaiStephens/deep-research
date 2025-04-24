@@ -149,8 +149,19 @@ function useModelProvider() {
         
         // Wrap the OpenRouter provider creation with error handling
         try {
+          // Generate the current host-based referer URL for OpenRouter
+          const refererUrl = typeof window !== 'undefined' 
+            ? window.location.href 
+            : "https://deep-research.pages.dev/";
+            
+          // Always use proxy mode when on Cloudflare (custom domain or pages.dev)
+          const effectiveMode = isCloudflare ? 'proxy' : mode;
+          
+          console.log("[CRITICAL] Creating OpenRouter provider with mode:", effectiveMode);
+          console.log("[CRITICAL] Using referer:", refererUrl);
+          
           const openrouter = createOpenRouter(
-            mode === "local"
+            effectiveMode === "local"
               ? {
                   baseURL: completePath(
                     openRouterApiProxy || OPENROUTER_BASE_URL,
@@ -159,7 +170,8 @@ function useModelProvider() {
                   apiKey: openRouterKey,
                   // Add HTTP-Referer for OpenRouter (required)
                   headers: {
-                    "HTTP-Referer": typeof window !== 'undefined' ? window.location.href : "https://deep-research.pages.dev/"
+                    "HTTP-Referer": refererUrl,
+                    "X-Title": "Deep Research"
                   }
                 }
               : {
@@ -167,7 +179,8 @@ function useModelProvider() {
                   apiKey: accessKey,
                   // Add HTTP-Referer for OpenRouter (required)
                   headers: {
-                    "HTTP-Referer": typeof window !== 'undefined' ? window.location.href : "https://deep-research.pages.dev/"
+                    "HTTP-Referer": refererUrl,
+                    "X-Title": "Deep Research"
                   }
                 }
           );
@@ -177,7 +190,7 @@ function useModelProvider() {
           return openrouter(model, settings);
         } catch (err) {
           console.error('[CRITICAL] Error creating OpenRouter provider:', err);
-          throw err;
+          throw new Error(`Failed to initialize OpenRouter: ${err instanceof Error ? err.message : "Unknown error"}`);
         }
       case "openaicompatible":
         const { openAICompatibleApiKey = "", openAICompatibleApiProxy } =
