@@ -37,13 +37,6 @@ function Home() {
         <FinalReport />
         <PodcastScript />
       </main>
-      <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
-        <a href="https://github.com/u14app/" target="_blank">
-          {t("copyright", {
-            name: "U14App",
-          })}
-        </a>
-      </footer>
       <aside className="print:hidden">
         <History
           open={globalStore.openHistory}
