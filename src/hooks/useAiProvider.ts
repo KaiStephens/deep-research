@@ -145,21 +145,39 @@ function useModelProvider() {
         const { openRouterApiKey = "", openRouterApiProxy } =
           useSettingStore.getState();
         const openRouterKey = multiApiKeyPolling(openRouterApiKey);
-        const openrouter = createOpenRouter(
-          mode === "local"
-            ? {
-                baseURL: completePath(
-                  openRouterApiProxy || OPENROUTER_BASE_URL,
-                  "/api/v1"
-                ),
-                apiKey: openRouterKey,
-              }
-            : {
-                baseURL: "/api/ai/openrouter/api/v1",
-                apiKey: accessKey,
-              }
-        );
-        return openrouter(model, settings);
+        
+        // Wrap the OpenRouter provider creation with error handling
+        try {
+          const openrouter = createOpenRouter(
+            mode === "local"
+              ? {
+                  baseURL: completePath(
+                    openRouterApiProxy || OPENROUTER_BASE_URL,
+                    "/api/v1"
+                  ),
+                  apiKey: openRouterKey,
+                  // Add HTTP-Referer for OpenRouter (required)
+                  headers: {
+                    "HTTP-Referer": typeof window !== 'undefined' ? window.location.href : "https://deep-research.pages.dev/"
+                  }
+                }
+              : {
+                  baseURL: "/api/ai/openrouter/api/v1",
+                  apiKey: accessKey,
+                  // Add HTTP-Referer for OpenRouter (required)
+                  headers: {
+                    "HTTP-Referer": typeof window !== 'undefined' ? window.location.href : "https://deep-research.pages.dev/"
+                  }
+                }
+          );
+          
+          // Create provider with enhanced logging
+          console.log("[CRITICAL] Creating OpenRouter provider for model:", model);
+          return openrouter(model, settings);
+        } catch (err) {
+          console.error('[CRITICAL] Error creating OpenRouter provider:', err);
+          throw err;
+        }
       case "openaicompatible":
         const { openAICompatibleApiKey = "", openAICompatibleApiProxy } =
           useSettingStore.getState();
