@@ -9,16 +9,16 @@ import { useSettingStore } from "@/store/setting";
 
 export function ThemeToggle() {
   const { t } = useTranslation();
-  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
   const settingStore = useSettingStore();
   
   // Ensure component is mounted before rendering to avoid hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Save theme changes to store after component is mounted
+  
+  // This useEffect only runs when mounted changes to true and when resolvedTheme changes
   useEffect(() => {
     if (mounted && resolvedTheme) {
       try {
@@ -27,7 +27,7 @@ export function ThemeToggle() {
         console.error("Error updating theme in store:", error);
       }
     }
-  }, [mounted, resolvedTheme, settingStore]);
+  }, [resolvedTheme, settingStore, mounted]);
 
   const toggleTheme = () => {
     try {
@@ -35,7 +35,6 @@ export function ThemeToggle() {
       const newTheme = currentTheme === "dark" ? "light" : "dark";
       setTheme(newTheme);
       
-      // Try to update store
       try {
         settingStore.update({ theme: newTheme });
       } catch (e) {
@@ -46,8 +45,9 @@ export function ThemeToggle() {
     }
   };
 
-  // Use a placeholder during SSR to avoid hydration mismatch
+  // Don't access theme for rendering until after client-side hydration is complete
   if (!mounted) {
+    // Render static placeholder button identical on server and client
     return (
       <Button
         className="h-8 w-8"
@@ -59,7 +59,7 @@ export function ThemeToggle() {
       </Button>
     );
   }
-
+  
   const isDark = resolvedTheme === "dark";
 
   return (

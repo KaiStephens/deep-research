@@ -35,18 +35,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="auto" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         {HEAD_SCRIPTS ? <Script id="headscript">{HEAD_SCRIPTS}</Script> : null}
         <Debugger />
       </head>
       <body className="antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          storageKey="deepPod-theme"
-        >
+        <ThemeProvider>
           <I18Provider>{children}</I18Provider>
         </ThemeProvider>
         <Toaster richColors toastOptions={{ duration: 3000 }} />

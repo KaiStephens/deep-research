@@ -8,5 +8,16 @@ export default function ThemeProvider({
   children,
   ...props
 }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+  return (
+    <NextThemesProvider 
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      storageKey="deepPod-theme"
+      disableTransitionOnChange
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }
