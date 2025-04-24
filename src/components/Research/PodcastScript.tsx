@@ -6,7 +6,7 @@ import { Download, FileText, Signature, LoaderCircle, Mic } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/Internal/Button";
 import {
   Form,
   FormControl,
@@ -28,14 +28,7 @@ import { useTaskStore } from "@/store/task";
 import { getSystemPrompt } from "@/utils/deep-research";
 import { downloadFile } from "@/utils/file";
 
-const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"), { 
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-40 bg-slate-50 dark:bg-slate-800 animate-pulse rounded-md">
-      <p className="text-slate-500">Loading editor...</p>
-    </div>
-  )
-});
+const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"));
 const Artifact = dynamic(() => import("@/components/Artifact"));
 
 const formSchema = z.object({
@@ -134,6 +127,7 @@ function PodcastScript() {
                   onChange={taskStore.updatePodcastScript}
                   buttonClassName="float-menu-button"
                   dropdownMenuSideOffset={8}
+                  tooltipSideOffset={8}
                 />
                 <div className="px-1">
                   <Separator className="dark:bg-slate-700" />
@@ -146,6 +140,8 @@ function PodcastScript() {
                       size="icon"
                       variant="ghost"
                       title={t("editor.export")}
+                      side="left"
+                      sideoffset={8}
                     >
                       <Download />
                     </Button>

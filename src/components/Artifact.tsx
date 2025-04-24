@@ -18,6 +18,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -32,6 +38,8 @@ type Props = {
   buttonClassName?: string;
   dropdownMenuSide?: "top" | "right" | "bottom" | "left";
   dropdownMenuSideOffset?: number;
+  tooltipSide?: "top" | "right" | "bottom" | "left";
+  tooltipSideOffset?: number;
 };
 
 function Artifact(props: Props) {
@@ -42,6 +50,8 @@ function Artifact(props: Props) {
     buttonClassName,
     dropdownMenuSide = "left",
     dropdownMenuSideOffset = 0,
+    tooltipSide = "left",
+    tooltipSideOffset = 0,
   } = props;
   const { t } = useTranslation();
   const {
@@ -55,22 +65,34 @@ function Artifact(props: Props) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className={buttonClassName}
-            type="button"
-            size="icon"
-            variant="ghost"
-            title={t("artifact.readingLevel")}
-            disabled={loadingAction !== ""}
-          >
-            {loadingAction === "readingLevel" ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <BookOpen />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className={buttonClassName}
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled={loadingAction !== ""}
+                >
+                  {loadingAction === "readingLevel" ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <BookOpen className="h-4 w-4" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side={tooltipSide}
+              sideOffset={tooltipSideOffset}
+              className="max-md:hidden"
+            >
+              <p>{t("artifact.readingLevel")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <DropdownMenuContent
           side={dropdownMenuSide}
           sideOffset={dropdownMenuSideOffset}
@@ -78,7 +100,7 @@ function Artifact(props: Props) {
           <DropdownMenuItem
             onClick={() => changeReadingLevel("PhD student", systemInstruction)}
           >
-            <GraduationCap />
+            <GraduationCap className="mr-2 h-4 w-4" />
             <span>{t("artifact.PhD")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -86,7 +108,7 @@ function Artifact(props: Props) {
               changeReadingLevel("college student", systemInstruction)
             }
           >
-            <School />
+            <School className="mr-2 h-4 w-4" />
             <span>{t("artifact.college")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -94,7 +116,7 @@ function Artifact(props: Props) {
               changeReadingLevel("high school student", systemInstruction)
             }
           >
-            <PersonStanding />
+            <PersonStanding className="mr-2 h-4 w-4" />
             <span>{t("artifact.teenager")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -102,34 +124,46 @@ function Artifact(props: Props) {
               changeReadingLevel("elementary school student", systemInstruction)
             }
           >
-            <Baby />
+            <Baby className="mr-2 h-4 w-4" />
             <span>{t("artifact.child")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => changeReadingLevel("pirate", systemInstruction)}
           >
-            <Swords />
+            <Swords className="mr-2 h-4 w-4" />
             <span>{t("artifact.pirate")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className={buttonClassName}
-            type="button"
-            size="icon"
-            variant="ghost"
-            title={t("artifact.adjustLength")}
-            disabled={loadingAction !== ""}
-          >
-            {loadingAction === "adjustLength" ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <SlidersVertical />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className={buttonClassName}
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled={loadingAction !== ""}
+                >
+                  {loadingAction === "adjustLength" ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <SlidersVertical className="h-4 w-4" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side={tooltipSide}
+              sideOffset={tooltipSideOffset}
+              className="max-md:hidden"
+            >
+              <p>{t("artifact.adjustLength")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <DropdownMenuContent
           side={dropdownMenuSide}
           sideOffset={dropdownMenuSideOffset}
@@ -142,7 +176,7 @@ function Artifact(props: Props) {
               )
             }
           >
-            <ChevronsUp />
+            <ChevronsUp className="mr-2 h-4 w-4" />
             <span>{t("artifact.longest")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -153,7 +187,7 @@ function Artifact(props: Props) {
               )
             }
           >
-            <ChevronUp />
+            <ChevronUp className="mr-2 h-4 w-4" />
             <span>{t("artifact.long")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -164,7 +198,7 @@ function Artifact(props: Props) {
               )
             }
           >
-            <ChevronDown />
+            <ChevronDown className="mr-2 h-4 w-4" />
             <span>{t("artifact.shorter")}</span>
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -175,28 +209,40 @@ function Artifact(props: Props) {
               )
             }
           >
-            <ChevronsDown />
+            <ChevronsDown className="mr-2 h-4 w-4" />
             <span>{t("artifact.shortest")}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className={buttonClassName}
-            type="button"
-            size="icon"
-            variant="ghost"
-            title={t("artifact.translate")}
-            disabled={loadingAction !== ""}
-          >
-            {loadingAction === "translate" ? (
-              <LoaderCircle className="animate-spin" />
-            ) : (
-              <Languages />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className={buttonClassName}
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled={loadingAction !== ""}
+                >
+                  {loadingAction === "translate" ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side={tooltipSide}
+              sideOffset={tooltipSideOffset}
+              className="max-md:hidden"
+            >
+              <p>{t("artifact.translate")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <DropdownMenuContent
           side={dropdownMenuSide}
           sideOffset={dropdownMenuSideOffset}
@@ -204,92 +250,116 @@ function Artifact(props: Props) {
           <DropdownMenuItem
             onClick={() => translate("English", systemInstruction)}
           >
-            <span>🇬🇧</span>
+            <span className="mr-2">🇬🇧</span>
             <span>English</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Simplified Chinese", systemInstruction)}
           >
-            <span>🇨🇳</span>
+            <span className="mr-2">🇨🇳</span>
             <span>简体中文</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Traditional Chinese", systemInstruction)}
           >
-            <span>🇭🇰</span>
+            <span className="mr-2">🇭🇰</span>
             <span>繁体中文</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Japanese", systemInstruction)}
           >
-            <span>🇯🇵</span>
+            <span className="mr-2">🇯🇵</span>
             <span>日本語</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Korean", systemInstruction)}
           >
-            <span>🇰🇷</span>
+            <span className="mr-2">🇰🇷</span>
             <span>한국어</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Spanish", systemInstruction)}
           >
-            <span>🇪🇸</span>
+            <span className="mr-2">🇪🇸</span>
             <span>Español</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("German", systemInstruction)}
           >
-            <span>🇩🇪</span>
+            <span className="mr-2">🇩🇪</span>
             <span>Deutsch</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("French", systemInstruction)}
           >
-            <span>🇫🇷</span>
+            <span className="mr-2">🇫🇷</span>
             <span>Français</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Portuguese", systemInstruction)}
           >
-            <span>🇧🇷</span>
+            <span className="mr-2">🇧🇷</span>
             <span>Português</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Russian", systemInstruction)}
           >
-            <span>🇷🇺</span>
+            <span className="mr-2">🇷🇺</span>
             <span>Русский</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Hindi", systemInstruction)}
           >
-            <span>🇮🇳</span>
+            <span className="mr-2">🇮🇳</span>
             <span>हिन्दी</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => translate("Arabic", systemInstruction)}
           >
-            <span>🇸🇦</span>
+            <span className="mr-2">🇸🇦</span>
             <span>العربية</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button
-        className={buttonClassName}
-        type="button"
-        size="icon"
-        variant="ghost"
-        title={t("artifact.continuation")}
-        disabled={loadingAction !== ""}
-        onClick={() => continuation(systemInstruction)}
-      >
-        {loadingAction === "continuation" ? (
-          <LoaderCircle className="animate-spin" />
-        ) : (
-          <ScrollText />
-        )}
-      </Button>
+      <DropdownMenu>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className={buttonClassName}
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled={loadingAction !== ""}
+                >
+                  {loadingAction === "continuation" ? (
+                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ScrollText className="h-4 w-4" />
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side={tooltipSide}
+              sideOffset={tooltipSideOffset}
+              className="max-md:hidden"
+            >
+              <p>{t("artifact.continuation")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DropdownMenuContent
+          side={dropdownMenuSide}
+          sideOffset={dropdownMenuSideOffset}
+        >
+          <DropdownMenuItem onClick={() => continuation(systemInstruction)}>
+            <ScrollText className="mr-2 h-4 w-4" />
+            <span>{t("artifact.continuation")}</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 }

@@ -27,15 +27,14 @@ import useDeepResearch from "@/hooks/useDeepResearch";
 import { useTaskStore } from "@/store/task";
 import { getSystemPrompt } from "@/utils/deep-research";
 import { downloadFile } from "@/utils/file";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"), { 
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-40 bg-slate-50 dark:bg-slate-800 animate-pulse rounded-md">
-      <p className="text-slate-500">Loading editor...</p>
-    </div>
-  )
-});
+const MilkdownEditor = dynamic(() => import("@/components/MilkdownEditor"));
 const Artifact = dynamic(() => import("@/components/Artifact"));
 
 const formSchema = z.object({
@@ -134,22 +133,31 @@ function FinalReport() {
                   onChange={taskStore.updateFinalReport}
                   buttonClassName="float-menu-button"
                   dropdownMenuSideOffset={8}
+                  tooltipSideOffset={8}
                 />
                 <div className="px-1">
                   <Separator className="dark:bg-slate-700" />
                 </div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className="float-menu-button"
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      title={t("editor.export")}
-                    >
-                      <Download />
-                    </Button>
-                  </DropdownMenuTrigger>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            className="float-menu-button"
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent side="left" sideOffset={8} className="max-md:hidden">
+                        <p>{t("editor.export")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <DropdownMenuContent
                     className="print:hidden"
                     side="left"
@@ -164,11 +172,11 @@ function FinalReport() {
                         )
                       }
                     >
-                      <FileText />
+                      <FileText className="mr-2 h-4 w-4" />
                       <span>Markdown</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleDownloadPDF()}>
-                      <Signature />
+                      <Signature className="mr-2 h-4 w-4" />
                       <span>PDF</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
