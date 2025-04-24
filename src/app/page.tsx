@@ -14,6 +14,7 @@ const SearchResult = dynamic(
   () => import("@/components/Research/SearchResult")
 );
 const FinalReport = dynamic(() => import("@/components/Research/FinalReport"));
+const PodcastScript = dynamic(() => import("@/components/Research/PodcastScript"));
 const History = dynamic(() => import("@/components/History"));
 
 function Home() {
@@ -35,6 +36,7 @@ function Home() {
         <Feedback />
         <SearchResult />
         <FinalReport />
+        <PodcastScript />
       </main>
       <footer className="my-4 text-center text-sm text-gray-600 print:hidden">
         <a href="https://github.com/u14app/" target="_blank">

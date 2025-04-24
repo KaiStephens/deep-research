@@ -237,6 +237,33 @@ export function writeFinalReportPrompt(
   ].join("\n\n");
 }
 
+export function writePodcastScriptPrompt(
+  query: string,
+  learnings: string[],
+  finalReport: string,
+  podcastRequirement: string
+) {
+  const learningsString = learnings
+    .map((learning) => `<learning>\n${learning}\n</learning>`)
+    .join("\n");
+  return [
+    `Given the following query from the user, write a podcast script on the topic using the final report and learnings from research:\n<query>${query}</query>`,
+    `Here are all the learnings from previous research:\n<learnings>\n${learningsString}\n</learnings>`,
+    `Here is the final report on the topic:\n<final_report>\n${finalReport}\n</final_report>`,
+    podcastRequirement !== ""
+      ? `Please write according to the user's podcast requirements:\n<podcastRequirement>${podcastRequirement}</podcastRequirement>`
+      : "",
+    `You need to write this podcast script like a professional podcast host. Include elements such as:
+    - Introduction with podcast name and topic
+    - Host/speaker designations for a clear dialog format
+    - Segment transitions
+    - Key talking points based on the research
+    - Call to action at the end
+    
+    Format the script in a way that's easy to read for speakers. Use markdown format with headings, lists, and emphasis where appropriate. **DO NOT** output anything other than the podcast script.`,
+  ].join("\n\n");
+}
+
 export function informationCollectorPrompt(query: string) {
   return [
     `Given the following query from the user:\n<query>${query}</query>`,

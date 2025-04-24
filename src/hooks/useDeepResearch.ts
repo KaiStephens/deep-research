@@ -20,6 +20,7 @@ import {
   reviewSerpQueriesPrompt,
   writeFinalReportPrompt,
   getSERPQuerySchema,
+  writePodcastScriptPrompt,
 } from "@/utils/deep-research";
 import { isNetworkingModel } from "@/utils/model";
 import { parseError } from "@/utils/error";
@@ -315,6 +316,31 @@ function useDeepResearch() {
     return content;
   }
 
+  async function writePodcastScript() {
+    const { language } = useSettingStore.getState();
+    const { query, tasks, finalReport, podcastRequirement } =
+      useTaskStore.getState();
+    const { thinkingModel } = getModel();
+    setStatus(t("research.common.writingPodcast"));
+    const learnings = tasks.map((item) => item.learning);
+    const result = streamText({
+      model: createProvider(thinkingModel),
+      system: [getSystemPrompt(), getOutputGuidelinesPrompt()].join("\n\n"),
+      prompt: [
+        writePodcastScriptPrompt(query, learnings, finalReport, podcastRequirement),
+        getResponseLanguagePrompt(language),
+      ].join("\n\n"),
+      experimental_transform: smoothTextStream(),
+      onError: handleError,
+    });
+    let content = "";
+    for await (const textPart of result.textStream) {
+      content += textPart;
+      taskStore.updatePodcastScript(content);
+    }
+    return content;
+  }
+
   async function deepResearch() {
     const { language } = useSettingStore.getState();
     const { query } = useTaskStore.getState();
@@ -369,6 +395,7 @@ function useDeepResearch() {
     runSearchTask,
     reviewSearchResult,
     writeFinalReport,
+    writePodcastScript,
   };
 }
 

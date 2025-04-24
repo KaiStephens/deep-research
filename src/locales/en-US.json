@@ -9,12 +9,14 @@
       "thinkingQuestion": "Thinking Question...",
       "startResearch": "Start Research",
       "writeReport": "Write Report",
+      "writePodcastScript": "Generate Podcast Script",
       "continueResearch": "Continue Research",
       "rewriteReport": "Rewrite Report",
       "sources": "Sources",
       "thinking": "Thinking...",
       "research": "Research...",
       "writing": "Writing...",
+      "writingPodcast": "Writing Podcast Script...",
       "newResearch": "New Research",
       "delete": "Delete"
     },
@@ -41,6 +43,13 @@
       "researchedInfor": "Researched {{total}} websites",
       "writingRequirementLabel": "Writing requirements (optional)",
       "writingRequirementPlaceholder": "You can raise any request related to report writing."
+    },
+    "podcastScript": {
+      "title": "5. Podcast Script",
+      "emptyTip": "Waiting for final report to be generated...",
+      "researchedInfor": "Researched {{total}} websites",
+      "podcastRequirementLabel": "Podcast requirements (optional)",
+      "podcastRequirementPlaceholder": "You can specify podcast style, tone, length, or any other requirements."
     },
     "history": {
       "title": "History",
