@@ -1,14 +1,15 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { Settings, Github, History } from "lucide-react";
+import { Github, History } from "lucide-react";
 import { Button } from "@/components/Internal/Button";
 import { useGlobalStore } from "@/store/global";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const VERSION = process.env.NEXT_PUBLIC_VERSION;
 
 function Header() {
   const { t } = useTranslation();
-  const { setOpenSetting, setOpenHistory } = useGlobalStore();
+  const { setOpenHistory } = useGlobalStore();
 
   return (
     <>
@@ -39,15 +40,7 @@ function Header() {
           >
             <History className="h-5 w-5" />
           </Button>
-          <Button
-            className="h-8 w-8"
-            title={t("setting.title")}
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpenSetting(true)}
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
+          <ThemeToggle />
         </div>
       </header>
     </>

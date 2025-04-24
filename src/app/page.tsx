@@ -7,7 +7,6 @@ import { useGlobalStore } from "@/store/global";
 import { useSettingStore } from "@/store/setting";
 
 const Header = dynamic(() => import("@/components/Header"));
-const Setting = dynamic(() => import("@/components/Setting"));
 const Topic = dynamic(() => import("@/components/Research/Topic"));
 const Feedback = dynamic(() => import("@/components/Research/Feedback"));
 const SearchResult = dynamic(
@@ -46,10 +45,6 @@ function Home() {
         </a>
       </footer>
       <aside className="print:hidden">
-        <Setting
-          open={globalStore.openSetting}
-          onClose={() => globalStore.setOpenSetting(false)}
-        />
         <History
           open={globalStore.openHistory}
           onClose={() => globalStore.setOpenHistory(false)}

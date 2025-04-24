@@ -165,6 +165,7 @@
     "checkForUpdate": "Check for update",
     "save": "Save",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "switchTheme": "Switch theme"
   }
 }
