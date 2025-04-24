@@ -254,13 +254,21 @@ export function writePodcastScriptPrompt(
       ? `Please write according to the user's podcast requirements:\n<podcastRequirement>${podcastRequirement}</podcastRequirement>`
       : "",
     `You need to write this podcast script like a professional podcast host. Include elements such as:
+    - A clear title at the top using # heading format
     - Introduction with podcast name and topic
-    - Host/speaker designations for a clear dialog format
-    - Segment transitions
+    - Host/speaker designations for a clear dialog format (use **bold** for speaker names)
+    - Segment transitions using ## or ### for section headings
     - Key talking points based on the research
     - Call to action at the end
     
-    Format the script in a way that's easy to read for speakers. Use markdown format with headings, lists, and emphasis where appropriate. **DO NOT** output anything other than the podcast script.`,
+    Format the script in a way that's easy to read when displayed in formatted view:
+    - Use headings (# for title, ## for major segments, ### for subsections)
+    - Use bold text (**Name:**) for speaker names
+    - Use bulleted lists for talking points
+    - Use emphasis (*italic*) for emphasis or direction notes
+    - Include clear segment breaks (--- or horizontal rules)
+    
+    The script should look professionally formatted when rendered. **DO NOT** output anything other than the podcast script.`,
   ].join("\n\n");
 }
 
